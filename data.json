@@ -1,0 +1,62 @@
+{
+  "hero": {
+    "name": "Raj Vadhavana",
+    "greeting": "Hello, I'm Raj",
+    "roles": ["Frontend Developer", "Web Designer", "UI/UX Enthusiast"],
+    "tagline": "I create beautiful, responsive websites with modern technologies. Passionate about solving problems and building digital experiences.",
+    "linkedin": "https://www.linkedin.com/in/Raj_Vadhavana/",
+    "instagram": "https://www.instagram.com/rajjj__1223/",
+    "github": "https://github.com/RajVadhavana",
+    "cv": "raj (1).pdf"
+  },
+  "about": {
+    "title": "Frontend Developer",
+    "short": "Hello! I'm Raj, a Passionate Web Developer skilled in HTML, CSS & JavaScript | Focused on clean UI, fast performance & accessibility | Exploring Full-Stack, Python & AI/ML",
+    "long": "I'm a passionate Frontend Developer who loves turning ideas into interactive and visually appealing websites. With skills in HTML, CSS, JavaScript, and modern frameworks, I enjoy creating designs that are not only beautiful but also responsive and user-friendly. For me, coding is like solving a creative puzzle—every project is a chance to bring something exciting to life."
+  },
+  "skills": [
+    { "name": "HTML5", "icon": "https://unpkg.com/simple-icons@v9/icons/html5.svg", "alt": "HTML5" },
+    { "name": "CSS3", "icon": "https://unpkg.com/simple-icons@v9/icons/css3.svg", "alt": "CSS3" },
+    { "name": "JavaScript", "icon": "https://unpkg.com/simple-icons@v9/icons/javascript.svg", "alt": "JavaScript" },
+    { "name": "Python", "icon": "https://unpkg.com/simple-icons@v9/icons/python.svg", "alt": "Python" },
+    { "name": "PHP", "icon": "https://unpkg.com/simple-icons@v9/icons/php.svg", "alt": "PHP" },
+    { "name": "MySQL", "icon": "https://unpkg.com/simple-icons@v9/icons/mysql.svg", "alt": "MySQL" },
+    { "name": "Git", "icon": "https://unpkg.com/simple-icons@v9/icons/git.svg", "alt": "Git" },
+    { "name": "UI/UX Design", "icon": "https://unpkg.com/simple-icons@v9/icons/adobexd.svg", "alt": "UI/UX Design" }
+  ],
+  "projects": [
+    {
+      "title": "Portfolio Website",
+      "description": "Personal portfolio website built with HTML, CSS & JavaScript. Features smooth animations, responsive design and dynamic content loading.",
+      "tech": ["HTML", "CSS", "JavaScript"],
+      "github": "https://github.com/RajVadhavana",
+      "live": "https://rajjjportfolio.netlify.app",
+      "icon": "bx bx-code-alt"
+    },
+    {
+      "title": "Hostel Admission System",
+      "description": "A complete hostel admission management website with student registration, room allocation and admin panel.",
+      "tech": ["PHP", "MySQL", "HTML", "CSS"],
+      "github": "https://github.com/RajVadhavana",
+      "live": "#",
+      "icon": "bx bx-building"
+    }
+  ],
+  "experience": [
+    {
+      "role": "Frontend Developer (Learning)",
+      "company": "Self-Taught",
+      "duration": "2023 - Present",
+      "description": "Building web projects using HTML, CSS, JavaScript. Learning PHP, MySQL, Python and exploring AI/ML.",
+      "icon": "bx bx-laptop"
+    }
+  ],
+  "education": [
+    {
+      "degree": "B.Sc. / Diploma in Computer Science",
+      "institution": "Your College Name",
+      "year": "2022 - Present",
+      "icon": "bx bx-book-open"
+    }
+  ]
+}

@@ -1,0 +1,482 @@
+// ==================== CONFIG ====================
+const ADMIN_PASSWORD = 'raj@admin123';
+const JSONBIN_BIN_ID = '6a22d155f5f4af5e29bdfbed';
+const JSONBIN_API_KEY = '$2a$10$XPTWO75QiCFZgF.qausImu.TzBzhg5WBfqOYtbWFu5KNVoGUBwNlK';
+const JSONBIN_GET_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`;
+const JSONBIN_PUT_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+
+// ==================== STATE ====================
+let portfolioData = {};
+
+// ==================== LOGIN ====================
+const loginScreen = document.getElementById('login-screen');
+const adminPanel = document.getElementById('admin-panel');
+const loginForm = document.getElementById('login-form');
+const loginError = document.getElementById('login-error');
+const togglePw = document.getElementById('toggle-pw');
+const passwordInput = document.getElementById('admin-password');
+
+// Check if already logged in
+if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+    showPanel();
+}
+
+loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const pw = passwordInput.value;
+    if (pw === ADMIN_PASSWORD) {
+        sessionStorage.setItem('adminLoggedIn', 'true');
+        loginError.classList.add('hidden');
+        showPanel();
+    } else {
+        loginError.classList.remove('hidden');
+        passwordInput.value = '';
+        passwordInput.focus();
+    }
+});
+
+togglePw.addEventListener('click', () => {
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        togglePw.className = 'bx bx-hide toggle-pw';
+    } else {
+        passwordInput.type = 'password';
+        togglePw.className = 'bx bx-show toggle-pw';
+    }
+});
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+    sessionStorage.removeItem('adminLoggedIn');
+    adminPanel.classList.add('hidden');
+    loginScreen.classList.remove('hidden');
+});
+
+async function showPanel() {
+    loginScreen.classList.add('hidden');
+    adminPanel.classList.remove('hidden');
+    await loadData();
+    populateAllForms();
+}
+
+// ==================== LOAD DATA ====================
+async function loadData() {
+    try {
+        // Try fetching from JSONbin (live data)
+        const res = await fetch(JSONBIN_GET_URL, {
+            headers: { 'X-Access-Key': JSONBIN_API_KEY }
+        });
+        const json = await res.json();
+        portfolioData = json.record;
+        localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
+    } catch(e) {
+        // Fallback to localStorage cache
+        const local = localStorage.getItem('portfolioData');
+        if (local) {
+            try { portfolioData = JSON.parse(local); } catch(e2) {}
+        } else {
+            portfolioData = {
+                hero: { name: '', greeting: '', roles: [], tagline: '', linkedin: '', instagram: '', github: '', cv: '' },
+                about: { title: '', short: '', long: '' },
+                skills: [], projects: [], experience: [], education: []
+            };
+        }
+    }
+}
+
+// ==================== POPULATE FORMS ====================
+function populateAllForms() {
+    const h = portfolioData.hero || {};
+    setVal('hero-name', h.name);
+    setVal('hero-greeting', h.greeting);
+    setVal('hero-roles', Array.isArray(h.roles) ? h.roles.join(', ') : h.roles);
+    setVal('hero-tagline', h.tagline);
+    setVal('hero-linkedin', h.linkedin);
+    setVal('hero-instagram', h.instagram);
+    setVal('hero-github', h.github);
+    setVal('hero-cv', h.cv);
+
+    const a = portfolioData.about || {};
+    setVal('about-title', a.title);
+    setVal('about-short', a.short);
+    setVal('about-long', a.long);
+
+    renderSkillsList(portfolioData.skills || []);
+    renderProjectsList(portfolioData.projects || []);
+    renderExperienceList(portfolioData.experience || []);
+    renderEducationList(portfolioData.education || []);
+}
+
+function setVal(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.value = val || '';
+}
+
+function getVal(id) {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+}
+
+// ==================== SKILLS ====================
+function renderSkillsList(skills) {
+    const container = document.getElementById('skills-list');
+    container.innerHTML = '';
+    skills.forEach((skill, i) => {
+        container.appendChild(createSkillRow(skill, i));
+    });
+}
+
+function createSkillRow(skill, index) {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.dataset.index = index;
+    row.innerHTML = `
+        <div class="item-row-header">
+            <span class="item-row-title">Skill #${index + 1}</span>
+            <button class="delete-btn" onclick="deleteItem('skills', ${index})">
+                <i class='bx bx-trash'></i> Remove
+            </button>
+        </div>
+        <div class="item-form-grid">
+            <div class="form-group">
+                <label>Skill Name</label>
+                <input type="text" data-field="name" value="${skill.name || ''}" placeholder="e.g. Python">
+            </div>
+            <div class="form-group">
+                <label>Icon URL <small>(simple-icons SVG)</small></label>
+                <input type="url" data-field="icon" value="${skill.icon || ''}" placeholder="https://unpkg.com/simple-icons@v9/icons/python.svg">
+            </div>
+            <div class="form-group">
+                <label>Alt Text</label>
+                <input type="text" data-field="alt" value="${skill.alt || ''}" placeholder="Python">
+            </div>
+        </div>
+    `;
+    return row;
+}
+
+function addSkill() {
+    if (!portfolioData.skills) portfolioData.skills = [];
+    portfolioData.skills.push({ name: '', icon: '', alt: '' });
+    renderSkillsList(portfolioData.skills);
+    scrollToBottom('skills-list');
+}
+
+// ==================== PROJECTS ====================
+function renderProjectsList(projects) {
+    const container = document.getElementById('projects-list');
+    container.innerHTML = '';
+    projects.forEach((proj, i) => {
+        container.appendChild(createProjectRow(proj, i));
+    });
+}
+
+function createProjectRow(proj, index) {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.dataset.index = index;
+    row.innerHTML = `
+        <div class="item-row-header">
+            <span class="item-row-title">Project #${index + 1}: ${proj.title || 'New Project'}</span>
+            <button class="delete-btn" onclick="deleteItem('projects', ${index})">
+                <i class='bx bx-trash'></i> Remove
+            </button>
+        </div>
+        <div class="item-form-grid">
+            <div class="form-group">
+                <label>Project Title</label>
+                <input type="text" data-field="title" value="${proj.title || ''}" placeholder="My Awesome Project">
+            </div>
+            <div class="form-group">
+                <label>Tech Stack <small>(comma separated)</small></label>
+                <input type="text" data-field="tech" value="${Array.isArray(proj.tech) ? proj.tech.join(', ') : proj.tech || ''}" placeholder="HTML, CSS, JavaScript">
+            </div>
+            <div class="form-group full">
+                <label>Description</label>
+                <textarea data-field="description" rows="3" placeholder="Describe your project...">${proj.description || ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label>GitHub URL</label>
+                <input type="url" data-field="github" value="${proj.github || ''}" placeholder="https://github.com/...">
+            </div>
+            <div class="form-group">
+                <label>Live URL</label>
+                <input type="url" data-field="live" value="${proj.live || ''}" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Icon Class <small>(Boxicons)</small></label>
+                <input type="text" data-field="icon" value="${proj.icon || 'bx bx-code-alt'}" placeholder="bx bx-code-alt">
+            </div>
+        </div>
+    `;
+    return row;
+}
+
+function addProject() {
+    if (!portfolioData.projects) portfolioData.projects = [];
+    portfolioData.projects.push({ title: '', description: '', tech: [], github: '', live: '', icon: 'bx bx-code-alt' });
+    renderProjectsList(portfolioData.projects);
+    scrollToBottom('projects-list');
+}
+
+// ==================== EXPERIENCE ====================
+function renderExperienceList(experience) {
+    const container = document.getElementById('experience-list');
+    container.innerHTML = '';
+    experience.forEach((exp, i) => {
+        container.appendChild(createExperienceRow(exp, i));
+    });
+}
+
+function createExperienceRow(exp, index) {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+        <div class="item-row-header">
+            <span class="item-row-title">Experience #${index + 1}</span>
+            <button class="delete-btn" onclick="deleteItem('experience', ${index})">
+                <i class='bx bx-trash'></i> Remove
+            </button>
+        </div>
+        <div class="item-form-grid">
+            <div class="form-group">
+                <label>Job Role / Title</label>
+                <input type="text" data-field="role" value="${exp.role || ''}" placeholder="Frontend Developer">
+            </div>
+            <div class="form-group">
+                <label>Company / Organization</label>
+                <input type="text" data-field="company" value="${exp.company || ''}" placeholder="Company Name">
+            </div>
+            <div class="form-group">
+                <label>Duration</label>
+                <input type="text" data-field="duration" value="${exp.duration || ''}" placeholder="Jan 2024 - Present">
+            </div>
+            <div class="form-group">
+                <label>Icon <small>(Boxicons)</small></label>
+                <input type="text" data-field="icon" value="${exp.icon || 'bx bx-briefcase'}" placeholder="bx bx-briefcase">
+            </div>
+            <div class="form-group full">
+                <label>Description</label>
+                <textarea data-field="description" rows="3" placeholder="What did you do there...">${exp.description || ''}</textarea>
+            </div>
+        </div>
+    `;
+    return row;
+}
+
+function addExperience() {
+    if (!portfolioData.experience) portfolioData.experience = [];
+    portfolioData.experience.push({ role: '', company: '', duration: '', description: '', icon: 'bx bx-briefcase' });
+    renderExperienceList(portfolioData.experience);
+    scrollToBottom('experience-list');
+}
+
+// ==================== EDUCATION ====================
+function renderEducationList(education) {
+    const container = document.getElementById('education-list');
+    container.innerHTML = '';
+    education.forEach((edu, i) => {
+        container.appendChild(createEducationRow(edu, i));
+    });
+}
+
+function createEducationRow(edu, index) {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+        <div class="item-row-header">
+            <span class="item-row-title">Education #${index + 1}</span>
+            <button class="delete-btn" onclick="deleteItem('education', ${index})">
+                <i class='bx bx-trash'></i> Remove
+            </button>
+        </div>
+        <div class="item-form-grid">
+            <div class="form-group">
+                <label>Degree / Course</label>
+                <input type="text" data-field="degree" value="${edu.degree || ''}" placeholder="B.Sc. Computer Science">
+            </div>
+            <div class="form-group">
+                <label>Institution / College</label>
+                <input type="text" data-field="institution" value="${edu.institution || ''}" placeholder="Your College Name">
+            </div>
+            <div class="form-group">
+                <label>Year</label>
+                <input type="text" data-field="year" value="${edu.year || ''}" placeholder="2022 - 2026">
+            </div>
+            <div class="form-group">
+                <label>Icon <small>(Boxicons)</small></label>
+                <input type="text" data-field="icon" value="${edu.icon || 'bx bx-graduation'}" placeholder="bx bx-graduation">
+            </div>
+        </div>
+    `;
+    return row;
+}
+
+function addEducation() {
+    if (!portfolioData.education) portfolioData.education = [];
+    portfolioData.education.push({ degree: '', institution: '', year: '', icon: 'bx bx-graduation' });
+    renderEducationList(portfolioData.education);
+    scrollToBottom('education-list');
+}
+
+// ==================== DELETE ITEM ====================
+function deleteItem(section, index) {
+    if (!confirm('Are you sure you want to remove this item?')) return;
+    if (portfolioData[section]) {
+        portfolioData[section].splice(index, 1);
+    }
+    if (section === 'skills') renderSkillsList(portfolioData.skills);
+    else if (section === 'projects') renderProjectsList(portfolioData.projects);
+    else if (section === 'experience') renderExperienceList(portfolioData.experience);
+    else if (section === 'education') renderEducationList(portfolioData.education);
+}
+
+// ==================== COLLECT FORM DATA ====================
+function collectFormData() {
+    // Hero
+    portfolioData.hero = {
+        name: getVal('hero-name'),
+        greeting: getVal('hero-greeting'),
+        roles: getVal('hero-roles').split(',').map(r => r.trim()).filter(Boolean),
+        tagline: getVal('hero-tagline'),
+        linkedin: getVal('hero-linkedin'),
+        instagram: getVal('hero-instagram'),
+        github: getVal('hero-github'),
+        cv: getVal('hero-cv')
+    };
+
+    // About
+    portfolioData.about = {
+        title: getVal('about-title'),
+        short: getVal('about-short'),
+        long: getVal('about-long')
+    };
+
+    // Skills - collect from DOM
+    portfolioData.skills = collectItemRows('skills-list', ['name', 'icon', 'alt']);
+
+    // Projects - collect from DOM
+    const projectRows = document.querySelectorAll('#projects-list .item-row');
+    portfolioData.projects = Array.from(projectRows).map(row => {
+        const obj = {};
+        row.querySelectorAll('[data-field]').forEach(el => {
+            const field = el.dataset.field;
+            if (field === 'tech') {
+                obj[field] = el.value.split(',').map(t => t.trim()).filter(Boolean);
+            } else {
+                obj[field] = el.value.trim();
+            }
+        });
+        return obj;
+    });
+
+    // Experience
+    portfolioData.experience = collectItemRows('experience-list', ['role', 'company', 'duration', 'icon', 'description']);
+
+    // Education
+    portfolioData.education = collectItemRows('education-list', ['degree', 'institution', 'year', 'icon']);
+}
+
+function collectItemRows(containerId, fields) {
+    const rows = document.querySelectorAll(`#${containerId} .item-row`);
+    return Array.from(rows).map(row => {
+        const obj = {};
+        row.querySelectorAll('[data-field]').forEach(el => {
+            obj[el.dataset.field] = el.value.trim();
+        });
+        return obj;
+    });
+}
+
+// ==================== SAVE ====================
+async function saveAllData() {
+    collectFormData();
+
+    // Show saving state
+    const saveBtn = document.getElementById('save-btn');
+    saveBtn.innerHTML = `<i class='bx bx-loader-alt bx-spin'></i> Saving...`;
+    saveBtn.disabled = true;
+
+    try {
+        // Save to JSONbin (live update!)
+        const res = await fetch(JSONBIN_PUT_URL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Access-Key': JSONBIN_API_KEY
+            },
+            body: JSON.stringify(portfolioData)
+        });
+
+        if (!res.ok) throw new Error('JSONbin save failed');
+
+        // Also cache locally
+        localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
+
+        showToast('✅ Saved! Portfolio updated live instantly!');
+    } catch(e) {
+        // Fallback: save locally only
+        localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
+        showToast('⚠️ Saved locally. Check internet connection.');
+    } finally {
+        saveBtn.innerHTML = `<i class='bx bx-save'></i> Save Changes`;
+        saveBtn.disabled = false;
+    }
+}
+
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toast-msg');
+    toastMsg.textContent = message;
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('hidden'), 3500);
+}
+
+// ==================== TABS ====================
+const navItems = document.querySelectorAll('.nav-item');
+const tabContents = document.querySelectorAll('.tab-content');
+const topbarTitle = document.getElementById('topbar-title');
+
+navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const tab = item.dataset.tab;
+
+        navItems.forEach(n => n.classList.remove('active'));
+        item.classList.add('active');
+
+        tabContents.forEach(t => {
+            t.classList.add('hidden');
+            t.classList.remove('active');
+        });
+
+        const target = document.getElementById('tab-' + tab);
+        if (target) {
+            target.classList.remove('hidden');
+            target.classList.add('active');
+        }
+
+        topbarTitle.textContent = item.querySelector('span').textContent;
+
+        // Close sidebar on mobile
+        if (window.innerWidth <= 768) {
+            document.getElementById('sidebar').classList.remove('open');
+        }
+    });
+});
+
+// ==================== MOBILE SIDEBAR ====================
+const sidebarEl = document.getElementById('sidebar');
+document.getElementById('menu-toggle').addEventListener('click', () => {
+    sidebarEl.classList.toggle('open');
+});
+document.getElementById('sidebar-close').addEventListener('click', () => {
+    sidebarEl.classList.remove('open');
+});
+
+// ==================== HELPERS ====================
+function scrollToBottom(containerId) {
+    setTimeout(() => {
+        const el = document.getElementById(containerId);
+        if (el) el.lastElementChild?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+}
