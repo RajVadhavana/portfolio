@@ -33,9 +33,7 @@ html {
 }
 
 /* ========= SCROLLBAR ========= */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+::-webkit-scrollbar { display: none; }
 
 body {
     background: var(--bg);
