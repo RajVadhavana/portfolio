@@ -273,3 +273,19 @@ window.addEventListener('load', () => {
 
 // ==================== INIT ====================
 loadPortfolioData();
+
+// ==================== LIVE UPDATE (LOCAL STORAGE) ====================
+window.addEventListener('storage', (e) => {
+    if (e.key === 'portfolioData' && e.newValue) {
+        try {
+            const data = JSON.parse(e.newValue);
+            if (data) {
+                renderHero(data.hero);
+                renderAbout(data.about);
+                renderSkills(data.skills);
+                renderProjects(data.projects);
+                renderExperience(data.experience, data.education);
+            }
+        } catch(err) {}
+    }
+});
