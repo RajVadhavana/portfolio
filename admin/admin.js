@@ -155,6 +155,7 @@ function createSkillRow(skill, index) {
 }
 
 function addSkill() {
+    collectFormData();
     if (!portfolioData.skills) portfolioData.skills = [];
     portfolioData.skills.push({ name: '', icon: '', alt: '' });
     renderSkillsList(portfolioData.skills);
@@ -212,6 +213,7 @@ function createProjectRow(proj, index) {
 }
 
 function addProject() {
+    collectFormData();
     if (!portfolioData.projects) portfolioData.projects = [];
     portfolioData.projects.push({ title: '', description: '', tech: [], github: '', live: '', icon: 'bx bx-code-alt' });
     renderProjectsList(portfolioData.projects);
@@ -264,6 +266,7 @@ function createExperienceRow(exp, index) {
 }
 
 function addExperience() {
+    collectFormData();
     if (!portfolioData.experience) portfolioData.experience = [];
     portfolioData.experience.push({ role: '', company: '', duration: '', description: '', icon: 'bx bx-briefcase' });
     renderExperienceList(portfolioData.experience);
@@ -312,6 +315,7 @@ function createEducationRow(edu, index) {
 }
 
 function addEducation() {
+    collectFormData();
     if (!portfolioData.education) portfolioData.education = [];
     portfolioData.education.push({ degree: '', institution: '', year: '', icon: 'bx bx-graduation' });
     renderEducationList(portfolioData.education);
@@ -321,6 +325,7 @@ function addEducation() {
 // ==================== DELETE ITEM ====================
 function deleteItem(section, index) {
     if (!confirm('Are you sure you want to remove this item?')) return;
+    collectFormData();
     if (portfolioData[section]) {
         portfolioData[section].splice(index, 1);
     }
@@ -402,7 +407,7 @@ async function saveAllData() {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Access-Key': JSONBIN_API_KEY
+                'X-Master-Key': JSONBIN_API_KEY
             },
             body: JSON.stringify(portfolioData)
         });
